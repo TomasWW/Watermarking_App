@@ -1,7 +1,9 @@
 import tkinter as tk
 from tkinter import filedialog
-from PIL import Image, ImageDraw, ImageFont, ImageFilter
+from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageTk
 from tkinter import simpledialog
+
+from PIL.ImageTk import PhotoImage
 
 
 class App(tk.Tk):
@@ -9,10 +11,13 @@ class App(tk.Tk):
         super().__init__()
 
         # Initialize variables
+
         self.user_input = None
-        self.geometry("400x400")  # Set the initial size of the window
+        # self.geometry("800x400")  # Set the initial size of the window
+
         self.label = None  # Initialize the label variable
         self.title("Watermark Maker")  # Set the window title
+        self.canvas = tk.Canvas(self, width=400, height=400)
         self.create_widget()  # Call the method to create widgets
 
     def create_widget(self):
@@ -21,26 +26,46 @@ class App(tk.Tk):
         self.quit_btn()
         self.wtm_text_btn()
         self.wtm_same_photo_btn()
+        self.show_photo_btn()
 
-    def quit_btn(self):
-        # Create a Quit button
-        self.button = tk.Button(text="Quit", command=self.quit)
-        self.button.place(x=80, y=160)  # Set the position of the button
 
     def file_btn(self):
         # Create a button to select a file
         self.button = tk.Button(text="Search File", command=self.open_file_name)
-        self.button.place(x=80, y=50)  # Set the position of the button
-
-    def wtm_text_btn(self):
-        # Create a button to add text as a watermark
-        self.button = tk.Button(text="Add Text as WaterMarker", command=self.wtm_text)
-        self.button.place(x=80, y=130)  # Set the position of the button
+        self.button.grid(column=0, row=0,sticky="w",padx=10, pady=5)  # Set the position of the button
 
     def wtm_same_photo_btn(self):
         # Create a button to add the same photo as a watermark
         self.button = tk.Button(text="Add Same photo as WaterMarker", command=self.wtm_same_img)
-        self.button.place(x=80, y=90)  # Set the position of the button
+        self.button.grid(column=0, row=1,sticky="w",padx=10, pady=5)  # Set the position of the button
+
+    def wtm_text_btn(self):
+        # Create a button to add text as a watermark
+        self.button = tk.Button(text="Add Text as WaterMarker", command=self.wtm_text)
+        self.button.grid(column=0, row=2, sticky="w", padx=10, pady=5)  # Set the position of the button
+
+    def show_photo_btn(self):
+
+        self.button = tk.Button(text="Show Photo", command=self.show_photo)
+        self.button.grid(column=0, row=3,sticky="w",padx=10, pady=5)
+
+
+
+
+    def quit_btn(self):
+        # Create a Quit button
+        self.button = tk.Button(text="Quit", command=self.quit)
+        self.button.grid(column=0, row=4,sticky="w",padx=10, pady=5)  # Set the position of the button
+
+    def show_photo(self):
+        if self.file_name:
+            self.canvas.delete("all")
+
+            image =  ImageTk.PhotoImage(Image.open(self.file_name))
+            self.canvas.create_image(0, 0, anchor=tk.NW, image=image)
+            self.canvas.config(width=image.width(), height=image.height())
+            self.canvas.grid(column=1,row=2, rowspan=10)
+            self.canvas.image = image
 
     def open_file_name(self):
         # Open a file dialog to select a file
