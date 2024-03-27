@@ -68,17 +68,35 @@ class App(tk.Tk):
         self.save_image(watermark_image)  # Save the image
 
     def wtm_same_img(self):
+        # Open the image file and convert it to RGBA mode (with alpha channel)
         image = Image.open(self.file_name).convert("RGBA")
-        opacity_level = int(80)
-        watermark = Image.open(self.file_name).convert("RGBA")
-        watermark = watermark.resize((image.width // 2, image.height // 2))  # Redimensionar la marca de agua
-        alpha = watermark.getchannel('A')
-        new_alpha = alpha.point(lambda i: opacity_level if i > 0 else 0)
-        watermark.putalpha(new_alpha)
-        position = ((image.width - watermark.width) // 2, (image.height - watermark.height) // 2)
-        image.paste(watermark, position, watermark)
-        self.save_image(image)
 
+        # Set the opacity level (from 0 to 255)
+        opacity_level = int(80)
+
+        # Open the watermark image file and convert it to RGBA mode
+        watermark = Image.open(self.file_name).convert("RGBA")
+
+        # Resize the watermark image to half of the size of the main image
+        watermark = watermark.resize((image.width // 2, image.height // 2))
+
+        # Extract the alpha channel from the watermark image
+        alpha = watermark.getchannel('A')
+
+        # Apply the opacity level to the alpha channel
+        new_alpha = alpha.point(lambda i: opacity_level if i > 0 else 0)
+
+        # Apply the modified alpha channel back to the watermark image
+        watermark.putalpha(new_alpha)
+
+        # Calculate the position to paste the watermark onto the main image
+        position = ((image.width - watermark.width) // 2, (image.height - watermark.height) // 2)
+
+        # Paste the watermark onto the main image
+        image.paste(watermark, position, watermark)
+
+        # Save the modified image
+        self.save_image(image)
 
     def save_image(self, image):
         try:
