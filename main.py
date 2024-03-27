@@ -44,8 +44,7 @@ class App(tk.Tk):
 
     def open_file_name(self):
         # Open a file dialog to select a file
-        self.file_name = filedialog.askopenfilename(initialdir="/", title="Select A File",
-                                                    filetypes=(("jpeg", "*.jpg"), ("png", "*.png")))
+        self.file_name = filedialog.askopenfilename(initialdir="/", title="Select A File")
         if self.label is not None:
             self.label.destroy()  # Destroy the label if it exists
         self.label = tk.Label(text="Image Upload")
@@ -69,28 +68,25 @@ class App(tk.Tk):
         self.save_image(watermark_image)  # Save the image
 
     def wtm_same_img(self):
-        # Add the same photo as a watermark
-        image = self.file_name
-        image = Image.open(image)  # Open the image
-        im2 = image
-        im1 = image.convert('L')  # Convert the image to grayscale
+        image = Image.open(self.file_name).convert("RGBA")
+        opacity_level = int(80)
+        watermark = Image.open(self.file_name).convert("RGBA")
+        watermark = watermark.resize((image.width // 2, image.height // 2))  # Redimensionar la marca de agua
+        alpha = watermark.getchannel('A')
+        new_alpha = alpha.point(lambda i: opacity_level if i > 0 else 0)
+        watermark.putalpha(new_alpha)
+        position = ((image.width - watermark.width) // 2, (image.height - watermark.height) // 2)
+        image.paste(watermark, position, watermark)
+        self.save_image(image)
 
-        threshold = 50
-        im1 = im1.point(lambda x: 255 if x > threshold else 0)  # Thresholding
-        im1 = im1.resize((im1.width // 2, im1.height // 2))  # Resize the image
-        im1 = im1.filter(ImageFilter.CONTOUR)  # Apply a filter
-        im1 = im1.point(lambda x: 0 if x == 255 else 255)  # Thresholding
-
-        im2.paste(im1, ((im2.width - im1.width) // 2, (im2.height - im1.height) // 2), im1)  # Paste the image
-
-        self.save_image(im2)  # Save the image
 
     def save_image(self, image):
         try:
+            image = image.convert("RGB")
             image.save(f"{self.file_name.split('.')[0]}-watermarked-image.jpeg")  # Save the image
             label_text = "Image Upload: " + self.file_name
-        except OSError:
-            return print("Could not find file path")
+        except OSError as er:
+            return print(er)
         if self.label is not None:
             self.label.destroy()  # Destroy the label if it exists
 
